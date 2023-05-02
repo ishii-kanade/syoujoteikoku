@@ -30,10 +30,10 @@ class Simulation:
             FemaleStudent(
                 random.randint(1800, 2200),
                 random.randint(2000, 3000),
-            random.random(),
-            random.uniform(0.01, 0.1),
-            random.uniform(0.01, 0.1)
-          )
+                random.random(),
+                random.uniform(0.01, 0.1),
+                random.uniform(0.01, 0.1)
+            )
           for _ in range(num_cubes)
         ]
         self.opened_cubes = 0
