@@ -28,11 +28,11 @@ class Simulation:
         self.cubes = [Cube() for _ in range(num_cubes)]
         self.students = [
             FemaleStudent(
-                random.randint(1800, 2200),
-                random.randint(2000, 3000),
-                random.random(),
-                random.uniform(0.01, 0.1),
-                random.uniform(0.01, 0.1)
+                base_calorie_requirement = random.randint(1800, 2200),
+                daily_water_requirement = random.randint(2000, 3000),
+                survival_ability = random.random(),
+                sickness_probability = random.uniform(0.01, 0.1),
+                injury_probability = random.uniform(0.01, 0.1)
             )
           for _ in range(num_cubes)
         ]
@@ -67,35 +67,46 @@ class Simulation:
             self.open_door(index)
 
         while len(self.students) > 1:
-            # 生存者に対して以下を実行します。
+            for i, student in enumerate(self.students):
+                calorie_requirement = student.base_calorie_requirement
+                water_requirement = student.daily_water_requirement
+
             # 病気になる確率に基づいて、健康状態を減らします。
-            if random.random() < self.students[0].sickness_probability:
-                self.students[0].current_health -= random.randint(1, 20)
+            if random.random() < student.sickness_probability:
+                student.current_health -= random.randint(1, 20)
 
             # 負傷する確率に基づいて、負傷レベルを増加させます。
-            if random.random() < self.students[0].injury_probability:
-                self.students[0].injury += random.randint(1, 20)
+            if random.random() < student.injury_probability:
+                student.injury += random.randint(1, 20)
             # ストレスを増やします。
-            self.students[0].stress += random.uniform(0.1, 1)
+            student.stress += random.uniform(0.1, 1)
 
-            # 最初の生存者に対して以下を実行します。
-            self.students[0].consume_food(self.students[0].base_calorie_requirement)
-            self.students[0].consume_water(self.students[0].daily_water_requirement)
+            # 食べ物と水を消費します。
+            student.consume_food(calorie_requirement)
+            student.consume_water(water_requirement)
+
             # 健康状態が100より低い場合、基本的なカロリー要件を追加します。
-            if self.students[0].current_health < 100:
-                self.students[0].base_calorie_requirement += 100
+            if student.current_health < 100:
+                student.base_calorie_requirement += 100
 
             # 生存者が死亡する場合、リストから削除します。
-            if self.students[0].food <= 0 or self.students[0].water <= 0 or self.students[0].stress >= 100:
-                self.students.pop(0)
+            if student.food <= 0 or student.water <= 0 or student.stress >= 100:
+                self.students.pop(i)
                 self.dead_students += 1
-                # ランダムな50人の生存者に食べ物と水を分配します。
-                for i in range(min(50, len(self.students))):
-                    self.students[i].food += (1 + self.students[i].survival_ability) * 2000
-                    self.students[i].water += (1 + self.students[i].survival_ability) * 2500
-            self.days_survived += 1
+                for j in range(min(50, len(self.students))):
+                        self.students[j].food += (1 + self.students[j].survival_ability) * 2000
+                        self.students[j].water += (1 + self.students[j].survival_ability) * 2500
 
+            self.days_survived += 1
         return self.opened_cubes, self.dead_students, self.days_survived
+
+
+def days_to_years_and_days(days):
+    years = days // 365  # 整数の年数を計算します。
+    leap_years = years // 4  # うるう年の数を計算します。
+    days -= years * 365 + leap_years  # 残りの日数を計算します。
+    return years, days
+
 print("Enter the number of cubes:")
 num_cubes = int(input())
 simulation = Simulation(num_cubes)
@@ -104,3 +115,5 @@ opened_cubes, dead_students, days_survived = simulation.run()
 print(f"Opened cubes: {opened_cubes}")
 print(f"Dead students: {dead_students}")
 print(f"Days survived: {days_survived}")
+years, days = days_to_years_and_days(days_survived)
+print(f"{years}年{days}日生き残りました。")
