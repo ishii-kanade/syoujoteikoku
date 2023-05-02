@@ -1,11 +1,20 @@
 import random
 
+
 class Cube:
     def __init__(self):
         self.opened = False
 
+
 class FemaleStudent:
-    def __init__(self, base_calorie_requirement, daily_water_requirement, survival_ability, sickness_probability, injury_probability):
+    def __init__(
+        self,
+        base_calorie_requirement,
+        daily_water_requirement,
+        survival_ability,
+        sickness_probability,
+        injury_probability,
+    ):
         self.food = 0
         self.water = 0
         self.base_calorie_requirement = base_calorie_requirement
@@ -23,35 +32,36 @@ class FemaleStudent:
     def consume_water(self, amount):
         self.water -= amount
 
+
 class Simulation:
     def __init__(self, num_cubes):
         self.cubes = [Cube() for _ in range(num_cubes)]
         self.students = [
             FemaleStudent(
-                base_calorie_requirement = random.randint(1800, 2200),
-                daily_water_requirement = random.randint(2000, 3000),
-                survival_ability = random.random(),
-                sickness_probability = random.uniform(0.01, 0.1),
-                injury_probability = random.uniform(0.01, 0.1)
+                base_calorie_requirement=random.randint(1800, 2200),
+                daily_water_requirement=random.randint(2000, 3000),
+                survival_ability=random.random(),
+                sickness_probability=random.uniform(0.01, 0.1),
+                injury_probability=random.uniform(0.01, 0.1),
             )
-          for _ in range(num_cubes)
+            for _ in range(num_cubes)
         ]
         self.opened_cubes = 0
         self.dead_students = 0
         self.days_survived = 0
 
     def reset(self):
-      for student in self.students:
-        student.food = 0
-        student.water = 0
-        student.current_health = 100
-        student.injury = 0
-        student.stress = 0
-      for cube in self.cubes:
-        cube.opened = False
-        self.opened_cubes = 0
-        self.dead_students = 0
-        self.days_survived = 0
+        for student in self.students:
+            student.food = 0
+            student.water = 0
+            student.current_health = 100
+            student.injury = 0
+            student.stress = 0
+        for cube in self.cubes:
+            cube.opened = False
+            self.opened_cubes = 0
+            self.dead_students = 0
+            self.days_survived = 0
 
     def open_door(self, cube_index):
         if not self.cubes[cube_index].opened:
@@ -94,8 +104,12 @@ class Simulation:
                 self.students.pop(i)
                 self.dead_students += 1
                 for j in range(min(50, len(self.students))):
-                        self.students[j].food += (1 + self.students[j].survival_ability) * 2000
-                        self.students[j].water += (1 + self.students[j].survival_ability) * 2500
+                    self.students[j].food += (
+                        1 + self.students[j].survival_ability
+                    ) * 2000
+                    self.students[j].water += (
+                        1 + self.students[j].survival_ability
+                    ) * 2500
 
             self.days_survived += 1
         return self.opened_cubes, self.dead_students, self.days_survived
@@ -106,6 +120,7 @@ def days_to_years_and_days(days):
     leap_years = years // 4  # うるう年の数を計算します。
     days -= years * 365 + leap_years  # 残りの日数を計算します。
     return years, days
+
 
 print("Enter the number of cubes:")
 num_cubes = int(input())
