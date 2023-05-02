@@ -101,6 +101,7 @@ class Simulation:
 
             # 生存者が死亡する場合、リストから削除します。
             if student.food <= 0 or student.water <= 0 or student.stress >= 100:
+                print(student.food, student.water, student.stress)
                 self.students.pop(i)
                 self.dead_students += 1
                 for j in range(min(50, len(self.students))):
@@ -129,6 +130,5 @@ opened_cubes, dead_students, days_survived = simulation.run()
 
 print(f"Opened cubes: {opened_cubes}")
 print(f"Dead students: {dead_students}")
-print(f"Days survived: {days_survived}")
 years, days = days_to_years_and_days(days_survived)
-print(f"{years}年{days}日生き残りました。")
+print(f"n-m=1になるまで{years}年{days}日")
