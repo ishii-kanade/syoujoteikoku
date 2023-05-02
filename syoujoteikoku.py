@@ -68,15 +68,15 @@ class Simulation:
 
         while len(self.students) > 1:
             # 生存者に対して以下を実行します。
-            for student in self.students:
-                # 病気になる確率に基づいて、健康状態を減らします。
-                if random.random() < student.sickness_probability:
-                    student.current_health -= random.randint(1, 20)
-                # 負傷する確率に基づいて、負傷レベルを増加させます。
-                if random.random() < student.injury_probability:
-                    student.injury += random.randint(1, 20)
-                # ストレスを増やします。
-                student.stress += random.uniform(0.1, 1)
+            # 病気になる確率に基づいて、健康状態を減らします。
+            if random.random() < self.students[0].sickness_probability:
+                self.students[0].current_health -= random.randint(1, 20)
+
+            # 負傷する確率に基づいて、負傷レベルを増加させます。
+            if random.random() < self.students[0].injury_probability:
+                self.students[0].injury += random.randint(1, 20)
+            # ストレスを増やします。
+            self.students[0].stress += random.uniform(0.1, 1)
 
             # 最初の生存者に対して以下を実行します。
             self.students[0].consume_food(self.students[0].base_calorie_requirement)
