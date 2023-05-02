@@ -104,7 +104,8 @@ class Simulation:
                 print(student.food, student.water, student.stress)
                 self.students.pop(i)
                 self.dead_students += 1
-                for j in range(min(50, len(self.students))):
+                # 死亡した女生徒の人肉が最大40人に配給される(女生徒の人肉が平均して、40kg=80000kcalであると仮定)
+                for j in range(min(40, len(self.students))):
                     self.students[j].food += (
                         1 + self.students[j].survival_ability
                     ) * 2000
