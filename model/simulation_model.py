@@ -1,39 +1,9 @@
+from model.cube import Cube
+from model.female_studente import FemaleStudent
 import random
 
 
-class Cube:
-    def __init__(self):
-        self.opened = False
-
-
-class FemaleStudent:
-    def __init__(
-        self,
-        base_calorie_requirement,
-        daily_water_requirement,
-        survival_ability,
-        sickness_probability,
-        injury_probability,
-    ):
-        self.food = 0
-        self.water = 0
-        self.base_calorie_requirement = base_calorie_requirement
-        self.daily_water_requirement = daily_water_requirement
-        self.survival_ability = survival_ability
-        self.sickness_probability = sickness_probability
-        self.injury_probability = injury_probability
-        self.current_health = 100
-        self.injury = 0
-        self.stress = 0
-
-    def consume_food(self, amount):
-        self.food -= amount
-
-    def consume_water(self, amount):
-        self.water -= amount
-
-
-class Simulation:
+class SimulationModel:
     def __init__(self, num_cubes):
         self.cubes = [Cube() for _ in range(num_cubes)]
         self.students = [
@@ -68,6 +38,12 @@ class Simulation:
             self.cubes[cube_index].opened = True
             self.opened_cubes += 1
 
+    def consume_food(self, student, amount):
+        student.food -= amount
+
+    def consume_water(self, student, amount):
+        student.water -= amount
+
     def apply_health_effects(self, student):
         # 病気になる確率に基づいて、健康状態を減らします。
         if random.random() < student.sickness_probability:
@@ -82,8 +58,8 @@ class Simulation:
 
     def consume_resources(self, student, calorie_requirement, water_requirement):
         # 食べ物と水を消費します。
-        student.consume_food(calorie_requirement)
-        student.consume_water(water_requirement)
+        self.consume_food(student, calorie_requirement)
+        self.consume_water(student, water_requirement)
 
     def adjust_calorie_requirement(self, student):
         # 健康状態が100より低い場合、基本的なカロリー要件を追加します。
@@ -125,21 +101,3 @@ class Simulation:
 
             self.days_survived += 1
         return self.opened_cubes, self.dead_students, self.days_survived
-
-
-def days_to_years_and_days(days):
-    years = days // 365  # 整数の年数を計算します。
-    leap_years = years // 4  # うるう年の数を計算します。
-    days -= years * 365 + leap_years  # 残りの日数を計算します。
-    return years, days
-
-
-print("Enter the number of cubes:")
-num_cubes = int(input())
-simulation = Simulation(num_cubes)
-opened_cubes, dead_students, days_survived = simulation.run()
-
-print(f"Opened cubes: {opened_cubes}")
-print(f"Dead students: {dead_students}")
-years, days = days_to_years_and_days(days_survived)
-print(f"n-m=1になるまで{years}年{days}日")
