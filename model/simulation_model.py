@@ -68,8 +68,7 @@ class SimulationModel:
 
     def remove_dead_student(self, i):
         # 生存者が死亡する場合、リストから削除します。
-        self.students.pop(i)
-        self.dead_students += 1
+        self.students[i].is_dead = True
 
     def distribute_resources(self):
         # 死亡した女生徒の人肉が最大40人に配給される(女生徒の人肉が平均して、40kg=80000kcalであると仮定)
@@ -85,7 +84,9 @@ class SimulationModel:
         for index in cube_indices:
             self.open_door(index)
 
-        while len(self.students) > 1:
+        alive_students = self.students
+
+        while len(alive_students) > 1:
             for i, student in enumerate(self.students):
                 calorie_requirement = student.base_calorie_requirement
                 water_requirement = student.daily_water_requirement
@@ -94,10 +95,22 @@ class SimulationModel:
                 self.consume_resources(student, calorie_requirement, water_requirement)
                 self.adjust_calorie_requirement(student)
 
+                event_chance = random.random()
+                if event_chance < 0.05:
+                    self.remove_dead_student(i)
+
+                if len(self.students) >= 40 and event_chance < 0.1:
+                    self.distribute_resources()
+
                 if student.food <= 0 or student.water <= 0 or student.stress >= 100:
-                    print(student.food, student.water, student.stress)
                     self.remove_dead_student(i)
                     self.distribute_resources()
 
+                alive_students = [
+                    student for student in self.students if not student.is_dead
+                ]
+
+                print(len(alive_students))
+            dead_students = [student for student in self.students if student.is_dead]
             self.days_survived += 1
-        return self.opened_cubes, self.dead_students, self.days_survived
+        return self.opened_cubes, len(dead_students), self.days_survived

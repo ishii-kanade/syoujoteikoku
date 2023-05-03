@@ -17,3 +17,4 @@ class FemaleStudent:
         self.current_health = 100
         self.injury = 0
         self.stress = 0
+        self.is_dead = False
