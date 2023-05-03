@@ -38,6 +38,16 @@ class SimulationModel:
             self.cubes[cube_index].opened = True
             self.opened_cubes += 1
 
+    def add_food(self, student, amount):
+        student.food += amount
+        if student.food > student.max_food:
+            student.food = student.max_food
+
+    def add_water(self, student, amount):
+        student.water += amount
+        if student.water > student.max_water:
+            student.water = student.max_water
+
     def consume_food(self, student, amount):
         student.food -= amount
 
@@ -73,8 +83,8 @@ class SimulationModel:
     def distribute_resources(self):
         # 死亡した女生徒の人肉が最大40人に配給される(女生徒の人肉が平均して、40kg=80000kcalであると仮定)
         for j in range(min(40, len(self.students))):
-            self.students[j].food += (1 + self.students[j].survival_ability) * 2000
-            self.students[j].water += (1 + self.students[j].survival_ability) * 2500
+            self.add_food(self.students[j], (1 + self.students[j].survival_ability) * 2000)
+            self.add_water(self.students[j], (1 + self.students[j].survival_ability) * 2500)
 
     def run(self):
         self.reset()

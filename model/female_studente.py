@@ -18,3 +18,5 @@ class FemaleStudent:
         self.injury = 0
         self.stress = 0
         self.is_dead = False
+        self.max_food = 10000  # 食料の最大値
+        self.max_water = 5000  # 水の最大値
