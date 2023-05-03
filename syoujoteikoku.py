@@ -68,6 +68,39 @@ class Simulation:
             self.cubes[cube_index].opened = True
             self.opened_cubes += 1
 
+    def apply_health_effects(self, student):
+        # 病気になる確率に基づいて、健康状態を減らします。
+        if random.random() < student.sickness_probability:
+            student.current_health -= random.randint(1, 20)
+
+        # 負傷する確率に基づいて、負傷レベルを増加させます。
+        if random.random() < student.injury_probability:
+            student.injury += random.randint(1, 20)
+
+        # ストレスを増やします。
+        student.stress += random.uniform(0.1, 1)
+
+    def consume_resources(self, student, calorie_requirement, water_requirement):
+        # 食べ物と水を消費します。
+        student.consume_food(calorie_requirement)
+        student.consume_water(water_requirement)
+
+    def adjust_calorie_requirement(self, student):
+        # 健康状態が100より低い場合、基本的なカロリー要件を追加します。
+        if student.current_health < 100:
+            student.base_calorie_requirement += 100
+
+    def remove_dead_student(self, i):
+        # 生存者が死亡する場合、リストから削除します。
+        self.students.pop(i)
+        self.dead_students += 1
+
+    def distribute_resources(self):
+        # 死亡した女生徒の人肉が最大40人に配給される(女生徒の人肉が平均して、40kg=80000kcalであると仮定)
+        for j in range(min(40, len(self.students))):
+            self.students[j].food += (1 + self.students[j].survival_ability) * 2000
+            self.students[j].water += (1 + self.students[j].survival_ability) * 2500
+
     def run(self):
         self.reset()
 
@@ -81,37 +114,14 @@ class Simulation:
                 calorie_requirement = student.base_calorie_requirement
                 water_requirement = student.daily_water_requirement
 
-            # 病気になる確率に基づいて、健康状態を減らします。
-            if random.random() < student.sickness_probability:
-                student.current_health -= random.randint(1, 20)
+                self.apply_health_effects(student)
+                self.consume_resources(student, calorie_requirement, water_requirement)
+                self.adjust_calorie_requirement(student)
 
-            # 負傷する確率に基づいて、負傷レベルを増加させます。
-            if random.random() < student.injury_probability:
-                student.injury += random.randint(1, 20)
-            # ストレスを増やします。
-            student.stress += random.uniform(0.1, 1)
-
-            # 食べ物と水を消費します。
-            student.consume_food(calorie_requirement)
-            student.consume_water(water_requirement)
-
-            # 健康状態が100より低い場合、基本的なカロリー要件を追加します。
-            if student.current_health < 100:
-                student.base_calorie_requirement += 100
-
-            # 生存者が死亡する場合、リストから削除します。
-            if student.food <= 0 or student.water <= 0 or student.stress >= 100:
-                print(student.food, student.water, student.stress)
-                self.students.pop(i)
-                self.dead_students += 1
-                # 死亡した女生徒の人肉が最大40人に配給される(女生徒の人肉が平均して、40kg=80000kcalであると仮定)
-                for j in range(min(40, len(self.students))):
-                    self.students[j].food += (
-                        1 + self.students[j].survival_ability
-                    ) * 2000
-                    self.students[j].water += (
-                        1 + self.students[j].survival_ability
-                    ) * 2500
+                if student.food <= 0 or student.water <= 0 or student.stress >= 100:
+                    print(student.food, student.water, student.stress)
+                    self.remove_dead_student(i)
+                    self.distribute_resources()
 
             self.days_survived += 1
         return self.opened_cubes, self.dead_students, self.days_survived
