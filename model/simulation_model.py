@@ -130,6 +130,7 @@ class SimulationModel:
                     student for student in self.students if not student.is_dead
                 ]
             self.days_survived += 1
+            print("Alive students: " + str(len(alive_students)))
         return (
             self.opened_cubes,
             len(self.students) - len(alive_students),
