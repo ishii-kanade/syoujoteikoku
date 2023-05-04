@@ -40,13 +40,9 @@ class SimulationModel:
 
     def add_food(self, student, amount):
         student.food += amount
-        if student.food > student.max_food:
-            student.food = student.max_food
 
     def add_water(self, student, amount):
         student.water += amount
-        if student.water > student.max_water:
-            student.water = student.max_water
 
     def consume_food(self, student, amount):
         student.food -= amount
@@ -57,37 +53,41 @@ class SimulationModel:
     def apply_health_effects(self, student):
         # 病気になる確率に基づいて、健康状態を減らします。
         if random.random() < student.sickness_probability:
-            student.current_health -= random.randint(1, 20)
+            student.current_health -= random.randint(-20, 20)
 
         # 負傷する確率に基づいて、負傷レベルを増加させます。
         if random.random() < student.injury_probability:
-            student.injury += random.randint(1, 20)
+            student.injury += random.randint(-20, 20)
 
         # ストレスを増やします。
-        student.stress += random.uniform(0.1, 1)
+        student.stress += random.randint(-1, 1)
 
-    def consume_resources(self, student, calorie_requirement, water_requirement):
+    def consume_resources(self, student):
         # 食べ物と水を消費します。
-        self.consume_food(student, calorie_requirement)
-        self.consume_water(student, water_requirement)
+        self.consume_food(student, student.base_calorie_requirement)
+        self.consume_water(student, student.daily_water_requirement)
 
     def adjust_calorie_requirement(self, student):
         # 健康状態が100より低い場合、基本的なカロリー要件を追加します。
         if student.current_health < 100:
             student.base_calorie_requirement += 100
 
-    def remove_dead_student(self, i):
-        # 生存者が死亡する場合、リストから削除します。
-        self.students[i].is_dead = True
-
-    def distribute_resources(self):
+    def distribute_resources(self, alive_students):
         # 死亡した女生徒の人肉が最大40人に配給される(女生徒の人肉が平均して、40kg=80000kcalであると仮定)
-        for j in range(min(40, len(self.students))):
-            self.add_food(
-                self.students[j], (1 + self.students[j].survival_ability) * 2000
-            )
-            self.add_water(
-                self.students[j], (1 + self.students[j].survival_ability) * 2500
+        students_to_receive_resources = alive_students[: min(40, len(alive_students))]
+
+        for student in students_to_receive_resources:
+            self.add_food(student, (1 + student.survival_ability) * 2000)
+            self.add_water(student, (1 + student.survival_ability) * 2500)
+
+    def random_food_water_event(self, student):
+        if random.random() < 0.1:
+            found_food = random.randint(500, 1000)
+            found_water = random.randint(500, 1500)
+            self.add_food(student, found_food)
+            self.add_water(student, found_water)
+            print(
+                f"Student found {found_food} units of food and {found_water} units of water."
             )
 
     def run(self):
@@ -101,27 +101,37 @@ class SimulationModel:
         alive_students = self.students
 
         while len(alive_students) > 1:
-            for i, student in enumerate(self.students):
-                calorie_requirement = student.base_calorie_requirement
-                water_requirement = student.daily_water_requirement
+            for student in alive_students:
+                if student.food <= 0:
+                    print("Student died due to lack of food.")
+                    student.is_dead = True
+                elif student.water <= 0:
+                    print("Student died due to lack of water.")
+                    student.is_dead = True
+                elif student.stress >= 100:
+                    print("Student died due to high stress.")
+                    student.is_dead = True
+                elif student.current_health <= 0:
+                    print("Student died due to poor health.")
+                    student.is_dead = True
+                elif student.injury >= 100:
+                    print("Student died due to severe injuries.")
+                    student.is_dead = True
 
+                if student.is_dead:
+                    self.distribute_resources(alive_students)
+
+                self.random_food_water_event(student)
                 self.apply_health_effects(student)
-                self.consume_resources(student, calorie_requirement, water_requirement)
+                self.consume_resources(student)
                 self.adjust_calorie_requirement(student)
-
-                if (
-                    student.food <= 0
-                    or student.water <= 0
-                    or student.stress >= 100
-                    or student.current_health <= 0
-                    or student.injury >= 100
-                ):
-                    self.remove_dead_student(i)
-                    self.distribute_resources()
 
                 alive_students = [
                     student for student in self.students if not student.is_dead
                 ]
-            dead_students = [student for student in self.students if student.is_dead]
             self.days_survived += 1
-        return self.opened_cubes, len(dead_students), self.days_survived
+        return (
+            self.opened_cubes,
+            len(self.students) - len(alive_students),
+            self.days_survived,
+        )
