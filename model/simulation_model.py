@@ -1,5 +1,5 @@
 from model.cube import Cube
-from model.female_studente import FemaleStudent
+from model.female_student import FemaleStudent
 import random
 
 
@@ -108,11 +108,6 @@ class SimulationModel:
                 self.apply_health_effects(student)
                 self.consume_resources(student, calorie_requirement, water_requirement)
                 self.adjust_calorie_requirement(student)
-
-                event_chance = random.random()
-
-                if len(self.students) >= 40 and event_chance < 0.1:
-                    self.distribute_resources()
 
                 if (
                     student.food <= 0
