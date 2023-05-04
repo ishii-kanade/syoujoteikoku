@@ -83,8 +83,12 @@ class SimulationModel:
     def distribute_resources(self):
         # 死亡した女生徒の人肉が最大40人に配給される(女生徒の人肉が平均して、40kg=80000kcalであると仮定)
         for j in range(min(40, len(self.students))):
-            self.add_food(self.students[j], (1 + self.students[j].survival_ability) * 2000)
-            self.add_water(self.students[j], (1 + self.students[j].survival_ability) * 2500)
+            self.add_food(
+                self.students[j], (1 + self.students[j].survival_ability) * 2000
+            )
+            self.add_water(
+                self.students[j], (1 + self.students[j].survival_ability) * 2500
+            )
 
     def run(self):
         self.reset()
@@ -106,21 +110,23 @@ class SimulationModel:
                 self.adjust_calorie_requirement(student)
 
                 event_chance = random.random()
-                if event_chance < 0.05:
-                    self.remove_dead_student(i)
 
                 if len(self.students) >= 40 and event_chance < 0.1:
                     self.distribute_resources()
 
-                if student.food <= 0 or student.water <= 0 or student.stress >= 100:
+                if (
+                    student.food <= 0
+                    or student.water <= 0
+                    or student.stress >= 100
+                    or student.current_health <= 0
+                    or student.injury >= 100
+                ):
                     self.remove_dead_student(i)
                     self.distribute_resources()
 
                 alive_students = [
                     student for student in self.students if not student.is_dead
                 ]
-
-                print(len(alive_students))
             dead_students = [student for student in self.students if student.is_dead]
             self.days_survived += 1
         return self.opened_cubes, len(dead_students), self.days_survived
